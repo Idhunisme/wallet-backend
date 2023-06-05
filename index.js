@@ -15,8 +15,6 @@ app.get("/nft", async (req, res) => {
   try {
     const { query } = req;
 
-    let NFTS;
-
     const address = query.address;
 
     const chain = query.chain;
@@ -27,8 +25,9 @@ app.get("/nft", async (req, res) => {
     });
 
     const result = response.raw;
+    const finalRes = result['result']
 
-    return res.status(200).json({ result });
+    return res.status(200).json(finalRes);
   } catch (error) {
     console.log(error);
     console.log("something went wrong");
