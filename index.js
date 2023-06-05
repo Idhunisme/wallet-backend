@@ -1,5 +1,6 @@
 const express = require("express");
 const Moralis = require("moralis").default;
+const axios = require("axios");
 
 const app = express();
 const cors = require("cors");
@@ -25,13 +26,35 @@ app.get("/nft", async (req, res) => {
     });
 
     const result = response.raw;
-    const finalRes = result['result']
+    const finalRes = result["result"];
 
     return res.status(200).json(finalRes);
   } catch (error) {
     console.log(error);
     console.log("something went wrong");
     return res.status(400).json();
+  }
+});
+
+app.get("/dapps", async (req, res) => {
+  const {query} = req
+  const apiUrl =
+    `https://api.dappradar.com/4tsxo4vuhotaojtl/dapps?chain=${query.chain}`;
+  const headers = {
+    "X-BLOBR-KEY": "DBxLPKxFrzfvwCPyVk5batVqhsHTjpeI",
+  };
+
+  try {
+    let dapps = await axios.get(apiUrl, {
+      headers,
+    });
+    console.log(dapps);
+    //    if(dapps) {
+    return res.status(200).json(dapps.data['results']);
+    //    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "An error occurred" });
   }
 });
 
