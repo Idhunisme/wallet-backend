@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import axios from "axios";
 import Moralis from "moralis";
 import { EvmChain, EvmAddressInput } from "@moralisweb3/common-evm-utils";
+import WebSocket from "ws";
 
 const app: Express = express();
 
@@ -16,6 +17,7 @@ app.get("/nft", async (req: Request, res: Response) => {
 
   try {
     const chain = EvmChain.create(network);
+    
     const response = await Moralis.EvmApi.nft.getWalletNFTs({
       address,
       chain,
@@ -79,13 +81,42 @@ app.get("/token", async (req: Request, res: Response) => {
   }
 });
 
-app.get('/')
+// Websocket Tickers
+const externalWebSocket = new WebSocket(
+  "wss://ws.coincap.io/prices?assets=ALL"
+);
+externalWebSocket.on("open", () => {
+  console.log("Connected to the external WebSocket server");
+});
+
+const wss = new WebSocket.Server({ path: "/price", noServer: true });
+wss.on("connection", (ws: WebSocket) => {
+  console.log("A client connected to the WebSocket server");
+
+  ws.on("message", (message: string) => {
+    console.log("Received message from client:", message);
+  });
+    
+  externalWebSocket.on("message", (message: string) => {
+    ws.send(message.toString());
+  });
+
+  ws.on("close", () => {
+    console.log('Client disconnected');
+  })
+});
 
 Moralis.start({
   apiKey:
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjNhNzA3YWVmLTg2YjktNDMxMC05YzY5LTgyNGZjNDA1NGNhMyIsIm9yZ0lkIjoiMzQxMjc2IiwidXNlcklkIjoiMzUwODM4IiwidHlwZUlkIjoiYTAwMzA4NzAtYjJmYi00MjkxLTkwMzQtYjY1YzFjMGQyZjBlIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE2ODU5MzU5ODYsImV4cCI6NDg0MTY5NTk4Nn0.8eN_GmC4ZViKPJHjKr-AE08MsJo5iprElJyMQ2-QfaI",
-}).then(() =>
-  app.listen(3000, () => {
+}).then(() => {
+  const server = app.listen(3000, () => {
     console.log("Server running");
-  })
-);
+  });
+
+  server.on('upgrade', (request, socket, head) => {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  });
+});
