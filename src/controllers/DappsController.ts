@@ -8,7 +8,7 @@ export class DappsController {
         const headers = {
           "X-BLOBR-KEY": "DBxLPKxFrzfvwCPyVk5batVqhsHTjpeI",
         };
-      
+        
         try {
           let dapps = await axios.get(apiUrl, {
             headers,

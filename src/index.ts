@@ -2,6 +2,8 @@ import express, { Express, Request, Response } from "express";
 import Moralis from "moralis";
 import Routes from "./routes/routes";
 import { WebSocketController } from "./controllers/WebSocketController";
+import { AccountController } from "./controllers/AccountController";
+import { stat } from "fs";
 
 const app: Express = express();
 
@@ -10,6 +12,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api", Routes);
+
 
 Moralis.start({
   apiKey:
