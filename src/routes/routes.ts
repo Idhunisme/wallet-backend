@@ -12,6 +12,9 @@ router.get('/dapps', DappsController.getDapps);
 router.get('/token', TokenController.getTokenPrice)
 router.get('/news', NewsController.getNews),
 router.get('/balance', AccountController.getEthBalance)
+router.get('/balance/token', AccountController.getTokenBalance)
+router.get('/tx', AccountController.getEthTransaction)
+router.get('/token/tx', AccountController.getTokenTransfer)
 
 
 export default router;
